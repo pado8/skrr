@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +34,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid black;
             text-align: center;
             padding: 8px;
@@ -66,145 +68,225 @@
             gap: 10px;
             justify-content: center;
         }
-    </style>
-</head>
-<body>
 
-<h2>플레이어 이름 입력</h2>
-<div class="player-names">
-    <input type="text" class="player-name" placeholder="플레이어 1">
-    <input type="text" class="player-name" placeholder="플레이어 2">
-    <input type="text" class="player-name" placeholder="플레이어 3">
-    <input type="text" class="player-name" placeholder="플레이어 4">
-    <input type="text" class="player-name" placeholder="플레이어 5">
-    <input type="text" class="player-name" placeholder="플레이어 6">
-    <button onclick="updateTable()">이름 설정</button>
-</div>
-
-<div class="table-wrapper">
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th rowspan="2" class="merged">라운드</th>
-                    <th colspan="2" id="player1">플레이어 1</th>
-                    <th colspan="2" id="player2">플레이어 2</th>
-                    <th colspan="2" id="player3">플레이어 3</th>
-                    <th colspan="2" id="player4">플레이어 4</th>
-                    <th colspan="2" id="player5">플레이어 5</th>
-                    <th colspan="2" id="player6">플레이어 6</th>
-                </tr>
-                <tr>
-                    <th>예측</th><th>결과</th>
-                    <th>예측</th><th>결과</th>
-                    <th>예측</th><th>결과</th>
-                    <th>예측</th><th>결과</th>
-                    <th>예측</th><th>결과</th>
-                    <th>예측</th><th>결과</th>
-                </tr>
-            </thead>
-            <tbody id="game-body">
-                <!-- 라운드 10개 자동 생성 -->
-            </tbody>
-        </table>
-    </div>
-
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th colspan="2">점수판</th>
-                </tr>
-            </thead>
-            <tbody id="score-board">
-                <!-- 점수판 자동 생성 -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    const gameBody = document.getElementById("game-body");
-    const scoreBoard = document.getElementById("score-board");
-
-    function createGameRows(playerNames) {
-        gameBody.innerHTML = "";
-        scoreBoard.innerHTML = "";
-
-        for (let i = 1; i <= 10; i++) {
-            const row = document.createElement("tr");
-            row.innerHTML = `<td class="merged">${i}</td>` +
-                playerNames.map(name => `
-                    <td><input type="number" class="predict" data-name="${name}" data-round="${i}" min="0" oninput="validateInput(this); updateScores('${name}')"></td>
-                    <td><input type="number" class="result" data-name="${name}" data-round="${i}" min="0" oninput="validateInput(this); updateScores('${name}')"></td>
-                `).join("");
-            gameBody.appendChild(row);
-        }
-
-        playerNames.forEach(name => {
-            const row = document.createElement("tr");
-            row.innerHTML = `<td>${name}</td><td><input type="number" class="score" data-name="${name}" value="0" readonly></td>`;
-            scoreBoard.appendChild(row);
-        });
-    }
-
-    function updateScores(playerName) {
-        let totalScore = 0;
-
-        document.querySelectorAll(`.predict[data-name='${playerName}']`).forEach(predictInput => {
-            const round = parseInt(predictInput.dataset.round);
-            const resultInput = document.querySelector(`.result[data-name='${playerName}'][data-round='${round}']`);
-
-            const predictValue = predictInput.value.trim() === "" ? null : Math.max(0, parseFloat(predictInput.value) || 0);
-            const resultValue = resultInput.value.trim() === "" ? null : Math.max(0, parseFloat(resultInput.value) || 0);
-
-            let score = 0;
-
-            // 입력이 하나라도 안 된 경우 해당 라운드는 0점 처리
-            if (predictValue === null || resultValue === null) {
-                score = 0;
-            } else {
-                if (predictValue === resultValue) {
-                    score = round * 10;
-                } else {
-                    score = -(Math.abs(predictValue - resultValue) * 10);
-                }
-
-                if (predictValue === 0) {
-                    score = resultValue === 0 ? round * 10 : -(round * 10);
-                }
-
-                // if (resultValue >= 3) score += 50;
-                // if (resultValue === 2) score += 20;
+        /* 📱 768px 이하 모바일 최적화 (드롭다운 적용) */
+        @media (max-width: 768px) {
+            .table-wrapper {
+                flex-direction: column;
+                align-items: center;
             }
 
-            totalScore += score;
-        });
+            th,
+            td {
+                font-size: 12px;
+                padding: 5px;
+            }
 
-        document.querySelector(`.score[data-name='${playerName}']`).value = totalScore;
-    }
+            select {
+                width: 100%;
+                padding: 5px;
+                font-size: 12px;
+                text-align: center;
+            }
 
-    function updateTable() {
-        const playerNames = Array.from(document.querySelectorAll(".player-name"))
-            .map(input => input.value.trim() || input.placeholder);
-
-        playerNames.forEach((name, index) => {
-            document.getElementById(`player${index + 1}`).textContent = name;
-        });
-
-        createGameRows(playerNames);
-    }
-
-    function validateInput(input) {
-        if (input.value.trim() === "" || parseFloat(input.value) < 0) {
-            input.value = "";
+            .pc-input {
+                display: none;
+            }
         }
+
+        @media (min-width: 769px) {
+            .mobile-select {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>플레이어 이름 입력</h2>
+    <div class="player-names">
+        <input type="text" class="player-name" placeholder="플레이어 1">
+        <input type="text" class="player-name" placeholder="플레이어 2">
+        <input type="text" class="player-name" placeholder="플레이어 3">
+        <input type="text" class="player-name" placeholder="플레이어 4">
+        <input type="text" class="player-name" placeholder="플레이어 5">
+        <input type="text" class="player-name" placeholder="플레이어 6">
+        <button onclick="updateTable()">이름 설정</button>
+    </div>
+
+    <div class="table-wrapper">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="merged">라운드</th>
+                        <th colspan="2" id="player1">플레이어 1</th>
+                        <th colspan="2" id="player2">플레이어 2</th>
+                        <th colspan="2" id="player3">플레이어 3</th>
+                        <th colspan="2" id="player4">플레이어 4</th>
+                        <th colspan="2" id="player5">플레이어 5</th>
+                        <th colspan="2" id="player6">플레이어 6</th>
+                    </tr>
+                    <tr>
+                        <th>예측</th>
+                        <th>결과</th>
+                        <th>예측</th>
+                        <th>결과</th>
+                        <th>예측</th>
+                        <th>결과</th>
+                        <th>예측</th>
+                        <th>결과</th>
+                        <th>예측</th>
+                        <th>결과</th>
+                        <th>예측</th>
+                        <th>결과</th>
+                    </tr>
+                </thead>
+                <tbody id="game-body">
+                    <!-- 라운드 10개 자동 생성 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">점수판</th>
+                    </tr>
+                </thead>
+                <tbody id="score-board">
+                    <!-- 점수판 자동 생성 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const gameBody = document.getElementById("game-body");
+        const scoreBoard = document.getElementById("score-board");
+
+
+        function isMobile() {
+            return window.matchMedia("(max-width: 768px)").matches;
+        }
+
+        function createGameRows(playerNames) {
+            gameBody.innerHTML = "";
+            scoreBoard.innerHTML = "";
+
+            for (let i = 1; i <= 10; i++) {
+                const row = document.createElement("tr");
+
+                if (isMobile()) {
+                    console.log("📱 모바일 기기에서 접속했습니다.");
+                    row.innerHTML = `<td class="merged">${i}</td>` +
+                        playerNames.map(name => `
+                    <td>${createInputField(name, i, "predict")}</td>
+                    <td>${createInputField(name, i, "result")}</td>
+                `).join("");
+                    gameBody.appendChild(row);
+                } else {
+                    console.log("💻 PC에서 접속했습니다.");
+                    row.innerHTML = `<td class="merged">${i}</td>` +
+                        playerNames.map(name => `
+                        <td><input type="number" class="predict" data-name="${name}" data-round="${i}" min="0" oninput="validateInput(this); updateScoresPC('${name}')"></td>
+                        <td><input type="number" class="result" data-name="${name}" data-round="${i}" min="0" oninput="validateInput(this); updateScoresPC('${name}')"></td>
+                    `).join("");
+                    gameBody.appendChild(row);
+                }
+
+
+            }
+
+            playerNames.forEach(name => {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td>${name}</td><td><input type="number" class="score" data-name="${name}" value="0" readonly></td>`;
+                scoreBoard.appendChild(row);
+            });
+        }
+
+        function updateScoresPC(playerName) {
+            let totalScore = 0;
+
+            document.querySelectorAll(`.predict[data-name='${playerName}']`).forEach(predictInput => {
+                const round = parseInt(predictInput.dataset.round);
+                const resultInput = document.querySelector(`.result[data-name='${playerName}'][data-round='${round}']`);
+
+                const predictValue = predictInput.value.trim() === "" ? null : Math.max(0, parseFloat(predictInput.value) || 0);
+                const resultValue = resultInput.value.trim() === "" ? null : Math.max(0, parseFloat(resultInput.value) || 0);
+
+                let score = 0;
+
+                // 입력이 하나라도 안 된 경우 해당 라운드는 0점 처리
+                if (predictValue === null || resultValue === null) {
+                    score = 0;
+                } else {
+                    if (predictValue === resultValue) {
+                        score = round * 10;
+                    } else {
+                        score = -(Math.abs(predictValue - resultValue) * 10);
+                    }
+
+                    if (predictValue === 0) {
+                        score = resultValue === 0 ? round * 10 : -(round * 10);
+                    }
+
+                    // if (resultValue >= 3) score += 50;
+                    // if (resultValue === 2) score += 20;
+                }
+
+                totalScore += score;
+            });
+
+            document.querySelector(`.score[data-name='${playerName}']`).value = totalScore;
+        }
+
+        function updateScoresMB(playerName) {
+        let totalScore = 0;
+        document.querySelectorAll(`.predict[data-name='${playerName}']`).forEach(predictInput => {
+            const round = predictInput.dataset.round;
+            const resultInput = document.querySelector(`.result[data-name='${playerName}'][data-round='${round}']`);
+            const predictValue = parseInt(predictInput.value) || 0;
+            const resultValue = resultInput ? parseInt(resultInput.value) : 0;
+            totalScore += (predictValue === resultValue ? round * 10 : -(Math.abs(predictValue - resultValue) * 10));
+        });
+
+        document.querySelector(`.pc-input[data-name='${playerName}']`).value = totalScore;
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        updateTable();
-    });
-</script>
+        function updateTable() {
+            const playerNames = Array.from(document.querySelectorAll(".player-name"))
+                .map(input => input.value.trim() || input.placeholder);
+
+            playerNames.forEach((name, index) => {
+                document.getElementById(`player${index + 1}`).textContent = name;
+            });
+
+            createGameRows(playerNames);
+        }
+
+        function validateInput(input) {
+            if (input.value.trim() === "" || parseFloat(input.value) < 0) {
+                input.value = "";
+            }
+        }
+
+        function createInputField(name, round, type) {
+            return `
+            <input type="number" class="pc-input ${type}" data-name="${name}" data-round="${round}" min="0" max="10" oninput="updateScoresMB('${name}')">
+            <select class="mobile-select ${type}" data-name="${name}" data-round="${round}" onchange="updateScoresMB('${name}')">
+                ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `<option value="${i}">${i}</option>`).join("")}
+            </select>
+        `;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateTable();
+        });
+    </script>
 
 </body>
+
 </html>
