@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스컬킹 점수 계산</title>
     <style>
-        body {
+      body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -22,6 +22,7 @@
         }
 
         .table-container {
+            max-width: 1000px;
             border-collapse: collapse;
             background: white;
             padding: 20px;
@@ -69,7 +70,25 @@
             justify-content: center;
         }
 
-        /* 📱 768px 이하 모바일 최적화 (드롭다운 적용) */
+        /* PC 버전 입력 필드 */
+        /* .pc-input {
+            width: 40px;
+            text-align: center;
+            border: 1px solid #ccc;
+            padding: 5px;
+            font-size: 14px;
+        } */
+
+        /* 점수판 크기 조정 */
+        .score-input {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            width: 80px;
+            padding: 8px;
+        }
+
+        /* 📱 768px 이하 모바일 최적화 (드롭다운 + 점수판 크기 증가) */
         @media (max-width: 768px) {
             .table-wrapper {
                 flex-direction: column;
@@ -78,19 +97,30 @@
 
             th,
             td {
-                font-size: 12px;
-                padding: 5px;
+                font-size: 16px;
+                padding: 10px;
             }
 
             select {
                 width: 100%;
-                padding: 5px;
-                font-size: 12px;
+                padding: 8px;
+                font-size: 16px;
                 text-align: center;
             }
 
-            .pc-input {
+            .pc-input:not(.score-input) {
                 display: none;
+            }
+
+            /* 모바일 점수판 크기 증가 */
+            .score-input {
+                font-size: 20px;
+                width: 100px;
+                padding: 12px;
+                background-color: #f8f8f8;
+                border: 2px solid #007bff;
+                color: #007bff;
+                font-weight: bold;
             }
         }
 
@@ -202,7 +232,7 @@
 
             playerNames.forEach(name => {
                 const row = document.createElement("tr");
-                row.innerHTML = `<td>${name}</td><td><input type="number" class="score" data-name="${name}" value="0" readonly></td>`;
+                row.innerHTML = `<td>${name}</td><td><input type="number" class="pc-input score-input" data-name="${name}" value="0" readonly></td>`;
                 scoreBoard.appendChild(row);
             });
         }
@@ -240,21 +270,37 @@
                 totalScore += score;
             });
 
-            document.querySelector(`.score[data-name='${playerName}']`).value = totalScore;
+            document.querySelector(`.score-input[data-name='${playerName}']`).value = totalScore;
         }
 
         function updateScoresMB(playerName) {
-        let totalScore = 0;
-        document.querySelectorAll(`.predict[data-name='${playerName}']`).forEach(predictInput => {
-            const round = predictInput.dataset.round;
-            const resultInput = document.querySelector(`.result[data-name='${playerName}'][data-round='${round}']`);
-            const predictValue = parseInt(predictInput.value) || 0;
-            const resultValue = resultInput ? parseInt(resultInput.value) : 0;
-            totalScore += (predictValue === resultValue ? round * 10 : -(Math.abs(predictValue - resultValue) * 10));
-        });
+            let totalScore = 0;
+            document.querySelectorAll(`.mobile-select.predict[data-name='${playerName}']`).forEach(predictInput => {
+                const round = predictInput.dataset.round;
+                const resultInput = document.querySelector(`.mobile-select.result[data-name='${playerName}'][data-round='${round}']`);
+                const predictValue = parseInt(predictInput.value) || 0;
+                const resultValue = resultInput ? parseInt(resultInput.value) : 0;
+                let score = 0;
+                // 입력이 하나라도 안 된 경우 해당 라운드는 0점 처리
+                if (predictValue === null || resultValue === null) {
+                    score = 0;
+                } else {
+                    if (predictValue === resultValue) {
+                        score = round * 10;
+                    } else {
+                        score = -(Math.abs(predictValue - resultValue) * 10);
+                    }
 
-        document.querySelector(`.pc-input[data-name='${playerName}']`).value = totalScore;
-    }
+                    if (predictValue === 0) {
+                        score = resultValue === 0 ? round * 10 : -(round * 10);
+                    }
+                    // if (resultValue >= 3) score += 50;
+                    // if (resultValue === 2) score += 20;
+                }
+                totalScore += score;
+            });
+            document.querySelector(`.score-input[data-name='${playerName}']`).value = totalScore;
+        }
 
         function updateTable() {
             const playerNames = Array.from(document.querySelectorAll(".player-name"))
@@ -276,7 +322,7 @@
         function createInputField(name, round, type) {
             return `
             <input type="number" class="pc-input ${type}" data-name="${name}" data-round="${round}" min="0" max="10" oninput="updateScoresMB('${name}')">
-            <select class="mobile-select ${type}" data-name="${name}" data-round="${round}" onchange="updateScoresMB('${name}')">
+            <select class="mobile-select ${type}" data-name="${name}" data-round="${round}" onchange="updateScoresMB('${name}')" onblur="updateScoresMB('${name}')">
                 ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `<option value="${i}">${i}</option>`).join("")}
             </select>
         `;
