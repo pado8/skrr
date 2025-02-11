@@ -6,7 +6,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스컬킹 점수 계산</title>
     <style>
-      body {
+        /* 모든 요소에 box-sizing을 border-box로 설정하여 패딩과 보더를 포함한 요소의 전체 크기를 지정합니다. */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* 기본 마진을 제거하여 일관된 여백을 설정합니다. */
+        body, h1, h2, h3, h4, p, figure, blockquote, dl, dd {
+            margin: 0;
+        }
+
+        /* HTML5 요소를 블록(display: block)으로 설정하여 레이아웃의 일관성을 유지합니다. */
+        article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+            display: block;
+        }
+
+        /* 본문 텍스트의 기본 라인 높이를 설정하여 가독성을 향상시킵니다. */
+        body {
+            line-height: 1.5;
+        }
+
+        /* 목록의 기본 스타일을 제거하여 커스텀 스타일링이 가능하도록 합니다. */
+        ol, ul {
+            list-style: none;
+        }
+
+        /* 인용문의 기본 따옴표 스타일을 제거합니다. */
+        blockquote, q {
+            quotes: none;
+        }
+
+        /* 테이블의 보더와 셀 간격을 제거하여 깔끔한 테이블 레이아웃을 만듭니다. */
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        /* 링크의 기본 밑줄을 제거하고, 현재 색상을 상속받도록 설정합니다. */
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* 이미지와 비디오 요소가 컨테이너의 너비를 초과하지 않도록 설정하여 반응형 디자인을 지원합니다. */
+        img, video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* 폼 요소가 상속된 폰트 스타일을 유지하도록 설정합니다. */
+        input, button, textarea, select {
+            font: inherit;
+        }
+
+
+      .skrrKing {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -23,6 +77,15 @@
 
         .table-container {
             max-width: 1000px;
+            border-collapse: collapse;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .score-container {
+            min-width: 400px;
             border-collapse: collapse;
             background: white;
             padding: 20px;
@@ -94,16 +157,20 @@
                 flex-direction: column;
                 align-items: center;
             }
-
+            
             th,
             td {
                 font-size: 16px;
                 padding: 10px;
             }
 
+            .table-container th,.table-container td {
+                padding: 0px;
+            }
+
             select {
                 width: 100%;
-                padding: 8px;
+                padding: 0px;
                 font-size: 16px;
                 text-align: center;
             }
@@ -116,11 +183,10 @@
             .score-input {
                 font-size: 20px;
                 width: 100px;
-                padding: 12px;
-                background-color: #f8f8f8;
-                border: 2px solid #007bff;
                 color: #007bff;
                 font-weight: bold;
+                text-indent: 16px;
+                pointer-events: none;
             }
         }
 
@@ -134,66 +200,74 @@
 
 <body>
 
-    <h2>플레이어 이름 입력</h2>
-    <div class="player-names">
-        <input type="text" class="player-name" placeholder="플레이어 1">
-        <input type="text" class="player-name" placeholder="플레이어 2">
-        <input type="text" class="player-name" placeholder="플레이어 3">
-        <input type="text" class="player-name" placeholder="플레이어 4">
-        <input type="text" class="player-name" placeholder="플레이어 5">
-        <input type="text" class="player-name" placeholder="플레이어 6">
-        <button onclick="updateTable()">이름 설정</button>
-    </div>
-
-    <div class="table-wrapper">
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th rowspan="2" class="merged">라운드</th>
-                        <th colspan="2" id="player1">플레이어 1</th>
-                        <th colspan="2" id="player2">플레이어 2</th>
-                        <th colspan="2" id="player3">플레이어 3</th>
-                        <th colspan="2" id="player4">플레이어 4</th>
-                        <th colspan="2" id="player5">플레이어 5</th>
-                        <th colspan="2" id="player6">플레이어 6</th>
-                    </tr>
-                    <tr>
-                        <th>예측</th>
-                        <th>결과</th>
-                        <th>예측</th>
-                        <th>결과</th>
-                        <th>예측</th>
-                        <th>결과</th>
-                        <th>예측</th>
-                        <th>결과</th>
-                        <th>예측</th>
-                        <th>결과</th>
-                        <th>예측</th>
-                        <th>결과</th>
-                    </tr>
-                </thead>
-                <tbody id="game-body">
-                    <!-- 라운드 10개 자동 생성 -->
-                </tbody>
-            </table>
+   <div id="strrKing">
+        <h2>플레이어 이름 입력</h2>
+        <div class="player-names">
+            <input type="text" class="player-name" placeholder="플레이어 1">
+            <input type="text" class="player-name" placeholder="플레이어 2">
+            <input type="text" class="player-name" placeholder="플레이어 3">
+            <input type="text" class="player-name" placeholder="플레이어 4">
+            <input type="text" class="player-name" placeholder="플레이어 5">
+            <input type="text" class="player-name" placeholder="플레이어 6">
+            <button onclick="updateTable()">이름 설정</button>
         </div>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th colspan="2">점수판</th>
-                    </tr>
-                </thead>
-                <tbody id="score-board">
-                    <!-- 점수판 자동 생성 -->
-                </tbody>
-            </table>
+    
+        <div class="table-wrapper">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="merged">라운드</th>
+                            <th colspan="2" id="player1">플레이어 1</th>
+                            <th colspan="2" id="player2">플레이어 2</th>
+                            <th colspan="2" id="player3">플레이어 3</th>
+                            <th colspan="2" id="player4">플레이어 4</th>
+                            <th colspan="2" id="player5">플레이어 5</th>
+                            <th colspan="2" id="player6">플레이어 6</th>
+                        </tr>
+                        <tr>
+                            <th>예측</th>
+                            <th>결과</th>
+                            <th>예측</th>
+                            <th>결과</th>
+                            <th>예측</th>
+                            <th>결과</th>
+                            <th>예측</th>
+                            <th>결과</th>
+                            <th>예측</th>
+                            <th>결과</th>
+                            <th>예측</th>
+                            <th>결과</th>
+                        </tr>
+                    </thead>
+                    <tbody id="game-body">
+                        <!-- 라운드 10개 자동 생성 -->
+                    </tbody>
+                </table>
+            </div>
+    
+            <div class="score-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">점수판</th>
+                        </tr>
+                    </thead>
+                    <tbody id="score-board">
+                        <!-- 점수판 자동 생성 -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-
+    
+   </div>
     <script>
+        // 획득한 트릭당 20
+        // 실패한 모든 트릭에 - 10
+
+        // 0 비딩시 맞추면 라운드 * 10
+        // 0 비딩시 틀리면 라운드 * -10
+
         const gameBody = document.getElementById("game-body");
         const scoreBoard = document.getElementById("score-board");
 
@@ -221,8 +295,8 @@
                     console.log("💻 PC에서 접속했습니다.");
                     row.innerHTML = `<td class="merged">${i}</td>` +
                         playerNames.map(name => `
-                        <td><input type="number" class="predict" data-name="${name}" data-round="${i}" min="0" oninput="validateInput(this); updateScoresPC('${name}')"></td>
-                        <td><input type="number" class="result" data-name="${name}" data-round="${i}" min="0" oninput="validateInput(this); updateScoresPC('${name}')"></td>
+                        <td><input type="number" class="predict" data-name="${name}" data-round="${i}" min="0" max="${i}" oninput="validateInput(this); updateScoresPC('${name}')"></td>
+                        <td><input type="number" class="result" data-name="${name}" data-round="${i}" min="0" max="${i}" oninput="validateInput(this); updateScoresPC('${name}')"></td>
                     `).join("");
                     gameBody.appendChild(row);
                 }
@@ -253,15 +327,16 @@
                 if (predictValue === null || resultValue === null) {
                     score = 0;
                 } else {
-                    if (predictValue === resultValue) {
-                        score = round * 10;
-                    } else {
-                        score = -(Math.abs(predictValue - resultValue) * 10);
-                    }
-
                     if (predictValue === 0) {
                         score = resultValue === 0 ? round * 10 : -(round * 10);
+                    } else {
+                        if (predictValue === resultValue) {
+                            score = round * 20;
+                        } else {
+                            score = -(Math.abs(predictValue - resultValue) * 10);
+                        }
                     }
+
 
                     // if (resultValue >= 3) score += 50;
                     // if (resultValue === 2) score += 20;
@@ -282,11 +357,11 @@
                 const resultValue = resultInput ? parseInt(resultInput.value) : 0;
                 let score = 0;
                 // 입력이 하나라도 안 된 경우 해당 라운드는 0점 처리
-                if (predictValue === null || resultValue === null) {
+                if ((predictValue === null || resultValue === null) || isNaN(resultValue)) {
                     score = 0;
                 } else {
                     if (predictValue === resultValue) {
-                        score = round * 10;
+                        score = round * 20;
                     } else {
                         score = -(Math.abs(predictValue - resultValue) * 10);
                     }
@@ -297,6 +372,7 @@
                     // if (resultValue >= 3) score += 50;
                     // if (resultValue === 2) score += 20;
                 }
+                console.log(score);
                 totalScore += score;
             });
             document.querySelector(`.score-input[data-name='${playerName}']`).value = totalScore;
@@ -321,9 +397,9 @@
 
         function createInputField(name, round, type) {
             return `
-            <input type="number" class="pc-input ${type}" data-name="${name}" data-round="${round}" min="0" max="10" oninput="updateScoresMB('${name}')">
+            <input type="number" class="pc-input ${type}" data-name="${name}" data-round="${round}" min="0" max="${round}" oninput="updateScoresMB('${name}')">
             <select class="mobile-select ${type}" data-name="${name}" data-round="${round}" onchange="updateScoresMB('${name}')" onblur="updateScoresMB('${name}')">
-                ${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `<option value="${i}">${i}</option>`).join("")}
+                ${['', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => `<option value="${i}">${i}</option>`).join("")}
             </select>
         `;
         }
